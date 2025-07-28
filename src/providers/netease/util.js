@@ -4,6 +4,19 @@ import { customAlphabet } from 'nanoid/non-secure'
 
 const nanoid = customAlphabet('1234567890abcdef', 32)
 
+// cookie字符串
+const customCookieString = `
+这里填你的网易云cookie
+`;
+
+// 将cookie字符串转换为对象
+const customCookieObject = customCookieString.split(';').reduce((acc, cookie) => {
+    const [key, ...rest] = cookie.trim().split('=');
+    acc[key] = rest.join('='); // 处理值中包含等号的情况
+    return acc;
+  }, {});
+  
+
 const chooseUserAgent = (ua = false) => {
     const userAgentList = {
         mobile: [
@@ -51,6 +64,17 @@ const cnip = () => {
 
 export const request = async (method, url, data = {}, options) => {
 
+    // 确保options.cookie是一个对象
+    if (typeof options.cookie === 'undefined' || options.cookie === null) {
+        options.cookie = {};
+    }
+
+    // 合并自定义cookie和用户定义的cookie（如果有）
+    options.cookie = {
+        ...customCookieObject,
+        ...options.cookie
+    };
+  
     let headers = { 'User-Agent': chooseUserAgent(options.ua) }
     if (method.toUpperCase() === 'POST')
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
